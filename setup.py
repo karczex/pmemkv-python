@@ -29,7 +29,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 link_modules = Extension('pmemkv_NI', ['pmemkv/kvengine.cc'], libraries = ['pmemkv', 'pmemkv_json_config'])
 
