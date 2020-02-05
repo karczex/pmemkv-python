@@ -13,13 +13,7 @@ assert() {
 }
 
 run_server() {
-	TEST_PATH=$1 gunicorn --chdir ${APP_DIR} --daemon -b localhost:8000 pmemkvREST:app
-	pid=$(ps aux |grep gunicorn |grep pmemkvREST | awk '{ print $2 }')
-	until curl -s http://localhost:8000
-	do
-		sleep 0.1
-	done
-	echo ${pid}
+	TEST_PATH=$1 python3 pmemkvREST.py
 }
 
 shutdown_server() {
