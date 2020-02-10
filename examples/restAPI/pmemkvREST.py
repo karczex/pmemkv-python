@@ -54,7 +54,7 @@ class Pmemkv():
             """ Open pmemkv datastore with parameters passed by config dictionary,
             and concurrent hash map as storage engine.
             """
-            self.db = pmemkv.datastore("cmap", config)
+            self.db = pmemkv.Database("cmap", config)
         except pmemkv.Error as e:
             print(f"Cannot open datastore: {e}")
             exit(1)

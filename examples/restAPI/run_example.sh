@@ -1,7 +1,9 @@
 #!/bin/bash
 
-TEST_PATH=${TEST_PATH:-/dev/shm/pmemkvREST_pool}
+set -x
+POOL_PATH=${TEST_PATH:-/dev/shm/pmemkvREST_pool}
 APP_DIR=${APP_DIR:-$PWD}
+POOL_SIZE=${POOL_SIZE:-1073741824}
 
 assert() {
 	echo "${1}"
@@ -13,7 +15,8 @@ assert() {
 }
 
 run_server() {
-	TEST_PATH=$1 python3 pmemkvREST.py
+	PMEMKV_POOL_PATH=$1 python3 pmemkvREST.py &
+	echo $!
 }
 
 shutdown_server() {
@@ -21,13 +24,13 @@ shutdown_server() {
 	kill ${pid}
 }
 
-if [ ! -f ${TEST_PATH} ]; then
-	echo "Creating pool for pmemkv"
-	pmempool create -s 1073741824 obj -l pmemkv ${TEST_PATH}
+if [ ! -f ${POOL_PATH} ]; then
+	echo "Creating pool for pmemkv with pmempool tool"
+	pmempool create -s ${POOL_SIZE} -l pmemkv obj ${POOL_PATH}
 fi
-echo "Run server with pmemkv concurrent hash map as storage"
-pid=$(run_server ${TEST_PATH})
 
+echo "Run server with pmemkv concurrent hash map as storage ${POOL_PATH}"
+run_server ${POOL_PATH}
 
 echo "Put data into database"
 curl -s -H "Content-type: application/json" -X PUT http://localhost:8000/db -d '{"message": "Hello Data"}'
@@ -36,7 +39,7 @@ assert "$(curl -s http://localhost:8000/db/message)" "\"Hello Data\""
 echo "Shutdown server"
 shutdown_server ${pid}
 echo "Rerun server"
-pid=$(run_server ${TEST_PATH})
+pid=$(run_server ${POLL_PATH})
 echo "Read data written in previous session:"
 assert "$(curl -s http://localhost:8000/db/message)" "\"Hello Data\""
 echo "Remove data"
